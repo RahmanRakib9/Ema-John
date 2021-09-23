@@ -9,7 +9,6 @@ const getUser = () => {
     }
 }
 
-
 const getDataKey = () => {
     const userId = getUser();
     return `emaJohn/carts/${userId}`

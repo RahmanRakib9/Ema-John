@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import fakeData from '../../fakeData';
 import Product from '../Product/Product';
@@ -12,7 +12,7 @@ const ProductDetail = () => {
           <div>
                <h1>Your Product Details</h1>
                <Product product={product} showAddToCart={false}></Product>
-               <Link to='/'><button>Home</button></Link>
+               <Link to='/'><button className='main-btn'>Home</button></Link>
           </div>
      );
 };
