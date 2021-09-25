@@ -1,6 +1,6 @@
 import React from 'react';
 import firebase from 'firebase/compat/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut, createUserWithEmailAndPassword } from "firebase/auth";
 import firebaseConfig from './FirebaseConfig';
 import { useState } from 'react';
 
@@ -11,7 +11,9 @@ const Login = () => {
           isUserSignedIn: false,
           userName: '',
           userEmail: '',
-          userPhoto: ''
+          userPhoto: '',
+          userSuccess: false,
+          userError: ''
      })
 
      //handle Google sign in
@@ -59,8 +61,42 @@ const Login = () => {
                })
      }
 
-     const handleBlur = () => {
+     const handleBlur = (e) => {
+          let isFieldValid = true;
+          if (e.target.name === 'email') {
+               isFieldValid = /\S+@\S+\.\S+/.test(e.target.value);
+          }
+          if (e.target.name === 'password') {
+               const minLength = e.target.value.length >= 6;
+               const containNumber = /\d{1}/.test(e.target.value);
+               isFieldValid = minLength && containNumber;
+          }
+          if (isFieldValid) {
+               const userInfo = { ...user };
+               userInfo[e.target.name] = e.target.value;
+               setUser(userInfo);
+          }
 
+     }
+
+     const handleSubmit = (e) => {
+          if (user.email && user.password) {
+               const auth = getAuth();
+               createUserWithEmailAndPassword(auth, user.email, user.password)
+                    .then((res) => {
+                         const userInfo = { ...user };
+                         userInfo.userSuccess = true;
+                         userInfo.userError = '';
+                         setUser(userInfo);
+                    })
+                    .catch((err) => {
+                         const userInfo = { ...user };
+                         userInfo.userSuccess = false;
+                         userInfo.userError = err.message;
+                         setUser(userInfo);
+                    })
+          }
+          e.preventDefault();
      }
 
      return (
@@ -87,11 +123,15 @@ const Login = () => {
                     </div>
                } */}
                <div style={{ marginTop: "5%" }}>
-                    <form action="">
+                    <form action="" onSubmit={handleSubmit}>
                          <input type="text" name='name' placeholder='Your Name' required onBlur={handleBlur} /><br /><br />
                          <input type="email" name='email' placeholder='Your Email' required onBlur={handleBlur} /><br /><br />
                          <input type="password" name='password' placeholder='Your Password' required onBlur={handleBlur} /><br /><br />
                          <button type='submit'>Submit</button>
+                         {/* conditionally display message */}
+                         {
+                              user.userSuccess ? <p style={{ color: 'green' }}>User Created Successfully !</p> : <p style={{ color: 'red' }}>{user.userError}</p>
+                         }
                     </form>
                </div>
           </div>
