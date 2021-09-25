@@ -1,12 +1,13 @@
 import React from 'react';
 import firebase from 'firebase/compat/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import firebaseConfig from './FirebaseConfig';
 import { useState } from 'react';
 
 firebase.initializeApp(firebaseConfig)
 
 const Login = () => {
+     const [newuser, setNewUser] = useState(false);
      const [user, setUser] = useState({
           isUserSignedIn: false,
           userName: '',
@@ -80,9 +81,25 @@ const Login = () => {
      }
 
      const handleSubmit = (e) => {
-          if (user.email && user.password) {
+          if (newuser && user.email && user.password) {
                const auth = getAuth();
                createUserWithEmailAndPassword(auth, user.email, user.password)
+                    .then((res) => {
+                         const userInfo = { ...user };
+                         userInfo.userSuccess = true;
+                         userInfo.userError = '';
+                         setUser(userInfo);
+                    })
+                    .catch((err) => {
+                         const userInfo = { ...user };
+                         userInfo.userSuccess = false;
+                         userInfo.userError = err.message;
+                         setUser(userInfo);
+                    })
+          }
+          if (!newuser && user.email && user.password) {
+               const auth = getAuth();
+               signInWithEmailAndPassword(auth, user.email, user.password)
                     .then((res) => {
                          const userInfo = { ...user };
                          userInfo.userSuccess = true;
@@ -124,13 +141,15 @@ const Login = () => {
                } */}
                <div style={{ marginTop: "5%" }}>
                     <form action="" onSubmit={handleSubmit}>
-                         <input type="text" name='name' placeholder='Your Name' required onBlur={handleBlur} /><br /><br />
+                         <input type="checkbox" name="newUser" onChange={() => setNewUser(!newuser)} />
+                         <label htmlFor="newUser">New User?</label><br />
+                         {newuser && <input type="text" name='name' placeholder='Your Name' required onBlur={handleBlur} />}<br /><br />
                          <input type="email" name='email' placeholder='Your Email' required onBlur={handleBlur} /><br /><br />
                          <input type="password" name='password' placeholder='Your Password' required onBlur={handleBlur} /><br /><br />
-                         <button type='submit'>Submit</button>
+                         <button type='submit'>{newuser?'Sign Up': 'LogIn'}</button>
                          {/* conditionally display message */}
                          {
-                              user.userSuccess ? <p style={{ color: 'green' }}>User Created Successfully !</p> : <p style={{ color: 'red' }}>{user.userError}</p>
+                              user.userSuccess ? <p style={{ color: 'green' }}>User {newuser ? 'Created' : 'Logged In'} Successfully !</p> : <p style={{ color: 'red' }}>{user.userError}</p>
                          }
                     </form>
                </div>
