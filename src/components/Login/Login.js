@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import firebase from 'firebase/compat/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import firebaseConfig from './FirebaseConfig';
 import { useState } from 'react';
+import { UserContext } from '../../App';
+import { useHistory, useLocation } from 'react-router';
 
 firebase.initializeApp(firebaseConfig)
 
 const Login = () => {
+     //state for new user
      const [newuser, setNewUser] = useState(false);
+     //user initial state
      const [user, setUser] = useState({
           isUserSignedIn: false,
           userName: '',
@@ -16,6 +20,12 @@ const Login = () => {
           userSuccess: false,
           userError: ''
      })
+     //useContext
+     const [loggedInUser, setLoggedInUser] = useContext(UserContext);
+     //redirect user
+     const history = useHistory();
+     const location = useLocation();
+     let { from } = location.state || { from: { pathname: "/" } };
 
      //handle Google sign in
      const handleGoogleSignIn = () => {
@@ -62,6 +72,7 @@ const Login = () => {
                })
      }
 
+     //get input value && regEx validation
      const handleBlur = (e) => {
           let isFieldValid = true;
           if (e.target.name === 'email') {
@@ -81,6 +92,7 @@ const Login = () => {
      }
 
      const handleSubmit = (e) => {
+          //create new user
           if (newuser && user.email && user.password) {
                const auth = getAuth();
                createUserWithEmailAndPassword(auth, user.email, user.password)
@@ -98,6 +110,7 @@ const Login = () => {
                     })
           }
           if (!newuser && user.email && user.password) {
+               //login existing user
                const auth = getAuth();
                signInWithEmailAndPassword(auth, user.email, user.password)
                     .then((res) => {
@@ -105,6 +118,8 @@ const Login = () => {
                          userInfo.userSuccess = true;
                          userInfo.userError = '';
                          setUser(userInfo);
+                         setLoggedInUser(userInfo); //set userInfo in Context
+                         history.replace(from) //redirect user destination
                     })
                     .catch((err) => {
                          const userInfo = { ...user };
@@ -146,7 +161,7 @@ const Login = () => {
                          {newuser && <input type="text" name='name' placeholder='Your Name' required onBlur={handleBlur} />}<br /><br />
                          <input type="email" name='email' placeholder='Your Email' required onBlur={handleBlur} /><br /><br />
                          <input type="password" name='password' placeholder='Your Password' required onBlur={handleBlur} /><br /><br />
-                         <button type='submit'>{newuser?'Sign Up': 'LogIn'}</button>
+                         <button type='submit'>{newuser ? 'Sign Up' : 'LogIn'}</button>
                          {/* conditionally display message */}
                          {
                               user.userSuccess ? <p style={{ color: 'green' }}>User {newuser ? 'Created' : 'Logged In'} Successfully !</p> : <p style={{ color: 'red' }}>{user.userError}</p>
