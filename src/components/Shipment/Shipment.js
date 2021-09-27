@@ -8,11 +8,10 @@ const Shipment = () => {
      const onSubmit = data => console.log(data);
      //use context
      const [loggedInUser, setLoggedInUser] = useContext(UserContext);
-
-     // console.log(watch("example"));
+     document.title='Shipment';
 
      return (
-          <form onSubmit={handleSubmit(onSubmit)} className='ship-form' style={{textAlign:"center"}}>
+          <form onSubmit={handleSubmit(onSubmit)} className='ship-form' >
                <input  {...register("name", { required: true })} defaultValue={loggedInUser.name} placeholder='Your Name' />
                {errors.name && <span className='error'>Name is required</span>}
 

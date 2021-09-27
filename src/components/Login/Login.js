@@ -19,7 +19,8 @@ const Login = () => {
           userPhoto: '',
           userSuccess: false,
           userError: ''
-     })
+     });
+     document.title='Login'
      //useContext
      const [loggedInUser, setLoggedInUser] = useContext(UserContext);
      //redirect user

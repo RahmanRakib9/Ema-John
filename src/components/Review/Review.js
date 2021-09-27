@@ -11,6 +11,7 @@ import { useHistory } from 'react-router';
 const Review = () => {
      const [cart, setCart] = useState([]);
      const [orderPlaced, setOrderPlaced] = useState(false);
+     document.title='Order Review'
 
      const removeProduct = (productKey) => {
           const newCart = cart.filter(pd => pd.key !== productKey);
